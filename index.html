@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FX Volume Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0C10;
+    --card:#12151B;
+    --card2:#161A21;
+    --border:#1E232B;
+    --text:#E8EAED;
+    --muted:#7C8797;
+    --gold:#F5A623;
+    --green:#3ECF8E;
+    --red:#E0645C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    -webkit-font-smoothing:antialiased;
+    padding:22px 14px 90px;
+    line-height:1.6;
+    letter-spacing:.02em;
+  }
+  h1,.disp{font-family:'Space Grotesk', sans-serif;}
+
+  header{margin-bottom:20px;}
+  header h1{font-size:19px;font-weight:700;margin:0 0 4px;}
+  header .sub{font-size:12px;color:var(--muted);}
+
+  .ticker{
+    margin-top:16px;
+    background:linear-gradient(180deg,var(--card2),var(--card));
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px 18px;
+    display:flex;justify-content:space-between;align-items:flex-end;gap:10px;
+  }
+  .ticker .block{flex:1;min-width:0;}
+  .ticker .label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;font-family:'Space Grotesk',sans-serif;}
+  .ticker .val{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+  .ticker .val.gold{color:var(--gold);}
+  .ticker .divider{width:1px;background:var(--border);align-self:stretch;}
+
+  .inputs{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px;margin-top:14px;
+  }
+  .row{display:flex;gap:12px;}
+  .row + .row{margin-top:12px;}
+  .field{flex:1;min-width:0;}
+  .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;font-family:'Space Grotesk',sans-serif;}
+  input{
+    width:100%;background:var(--card2);border:1px solid var(--border);
+    color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:15px;
+    padding:10px 11px;border-radius:8px;outline:none;letter-spacing:.03em;
+  }
+  input:focus{border-color:var(--gold);}
+
+  details{
+    margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+    overflow:hidden;
+  }
+  summary{
+    padding:14px 16px;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+    font-size:12.5px;color:var(--muted);letter-spacing:.03em;
+    list-style:none;display:flex;justify-content:space-between;align-items:center;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary:after{content:'⚙ Tùy chỉnh';}
+  details .adv-body{padding:0 16px 16px;border-top:1px solid var(--border);padding-top:14px;}
+  .asset-adv{margin-bottom:14px;}
+  .asset-adv:last-child{margin-bottom:0;}
+  .asset-adv .aname{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;}
+
+  .assetcard{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:18px;margin-top:14px;
+  }
+  .assetcard .ahead{
+    display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;
+  }
+  .assetcard .ahead .name{font-size:17px;font-weight:700;color:var(--gold);font-family:'Space Grotesk',sans-serif;}
+  .assetcard .ahead .slinfo{font-size:11px;color:var(--muted);}
+
+  .lvrow{
+    display:grid;grid-template-columns:1fr auto auto;align-items:center;
+    gap:10px;padding:13px 0;border-top:1px solid var(--border);
+  }
+  .lvrow:first-of-type{border-top:none;}
+  .lvrow .pct{font-size:12.5px;color:var(--text);font-family:'Space Grotesk',sans-serif;}
+  .lvrow .pct .p{color:var(--muted);font-size:10.5px;display:block;margin-top:2px;}
+  .lvrow .lot{
+    font-size:20px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;
+    text-align:right;font-family:'Space Grotesk',sans-serif;
+  }
+  .lvrow .risk{text-align:right;min-width:92px;}
+  .lvrow .risk .r1{font-size:12px;color:var(--text);font-variant-numeric:tabular-nums;}
+  .lvrow .risk .r2{font-size:10px;color:var(--muted);margin-top:2px;}
+  .lvrow .risk .r2.warn{color:var(--gold);}
+
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:24px;line-height:1.7;padding:0 6px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FX Volume Calculator</h1>
+  <div class="sub">BTC · ETH · XAU — SL cố định, tính Lot theo % tài khoản</div>
+
+  <div class="ticker">
+    <div class="block">
+      <div class="label">Vốn hiện tại</div>
+      <div class="val" id="tCapital">500</div>
+    </div>
+    <div class="divider"></div>
+    <div class="block">
+      <div class="label">Mục tiêu</div>
+      <div class="val" id="tTarget">8000</div>
+    </div>
+    <div class="divider"></div>
+    <div class="block">
+      <div class="label">Còn thiếu</div>
+      <div class="val gold" id="tRemain">7500</div>
+    </div>
+  </div>
+</header>
+
+<div class="inputs">
+  <div class="row">
+    <div class="field">
+      <label>Vốn tài khoản FX (USD)</label>
+      <input type="number" id="capital" value="500" inputmode="decimal" oninput="calculate()">
+    </div>
+    <div class="field">
+      <label>Mục tiêu (USD)</label>
+      <input type="number" id="target" value="8000" inputmode="decimal" oninput="calculate()">
+    </div>
+  </div>
+</div>
+
+<details id="advDetails">
+  <summary>Cài đặt SL cố định & giới hạn Lot</summary>
+  <div class="adv-body" id="advBody"></div>
+</details>
+
+<div id="results"></div>
+
+<footer>Volume (Lot) = Risk USD ÷ (SL cố định × giá trị/điểm/lot) — làm tròn bậc 0.01, giới hạn trong [Lot min, Lot max]. Vì lot bị làm tròn/giới hạn, Risk thực tế có thể lệch khỏi Risk mục tiêu — xem cột bên phải.</footer>
+
+<script>
+let assets = [
+  {name:"BTC", sl:1000, pointValue:1},
+  {name:"ETH", sl:1000, pointValue:1},
+  {name:"XAU", sl:10,   pointValue:100},
+];
+let lotMin = 0.01;
+let lotMax = 2;
+const lotStep = 0.01;
+const levels = [5, 2.5, 1.25, 0.625]; // % risk mỗi lệnh
+
+function fmt(n){
+  if(!isFinite(n)) return '-';
+  return n.toLocaleString('en-US', {maximumFractionDigits:4});
+}
+
+function renderAdvanced(){
+  const box = document.getElementById('advBody');
+  let html = '';
+  assets.forEach((a,i)=>{
+    html += `
+      <div class="asset-adv">
+        <div class="aname">${a.name}</div>
+        <div class="row">
+          <div class="field">
+            <label>SL cố định (điểm)</label>
+            <input type="number" value="${a.sl}" inputmode="decimal" oninput="assets[${i}].sl=parseFloat(this.value)||0;calculate()">
+          </div>
+          <div class="field">
+            <label>Giá trị/điểm/1.00 lot (USD)</label>
+            <input type="number" value="${a.pointValue}" inputmode="decimal" oninput="assets[${i}].pointValue=parseFloat(this.value)||0;calculate()">
+          </div>
+        </div>
+      </div>`;
+  });
+  html += `
+    <div class="asset-adv" style="border-top:1px solid var(--border);padding-top:14px;">
+      <div class="aname" style="color:var(--muted);">Giới hạn Lot</div>
+      <div class="row">
+        <div class="field">
+          <label>Lot tối thiểu</label>
+          <input type="number" value="${lotMin}" step="0.01" inputmode="decimal" oninput="lotMin=parseFloat(this.value)||0.01;calculate()">
+        </div>
+        <div class="field">
+          <label>Lot tối đa</label>
+          <input type="number" value="${lotMax}" step="0.01" inputmode="decimal" oninput="lotMax=parseFloat(this.value)||2;calculate()">
+        </div>
+      </div>
+    </div>`;
+  box.innerHTML = html;
+}
+
+function calculate(){
+  const capital = parseFloat(document.getElementById('capital').value)||0;
+  const target = parseFloat(document.getElementById('target').value)||0;
+
+  document.getElementById('tCapital').textContent = fmt(capital);
+  document.getElementById('tTarget').textContent = fmt(target);
+  document.getElementById('tRemain').textContent = fmt(target-capital);
+
+  const resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = '';
+
+  assets.forEach(a=>{
+    const card = document.createElement('div');
+    card.className = 'assetcard';
+
+    let rows = '';
+    levels.forEach(pct=>{
+      const riskUSD = capital * pct/100;
+      const denom = a.sl * a.pointValue;
+      let rawLot = denom ? riskUSD/denom : 0;
+      let lot = Math.round(rawLot/lotStep)*lotStep;
+      let clampNote = '';
+      if(riskUSD > 0 && lot < lotMin){ lot = lotMin; clampNote = 'chạm sàn lot'; }
+      if(lot > lotMax){ lot = lotMax; clampNote = 'chạm trần lot'; }
+      lot = Math.round(lot*100)/100;
+      const actualRisk = lot * denom;
+
+      rows += `
+        <div class="lvrow">
+          <div class="pct">${pct}%<span class="p">Risk ${fmt(riskUSD)}$</span></div>
+          <div class="risk">
+            <div class="r1">${fmt(actualRisk)}$</div>
+            <div class="r2 ${clampNote?'warn':''}">${clampNote || 'risk thực tế'}</div>
+          </div>
+          <div class="lot">${lot.toFixed(2)}</div>
+        </div>`;
+    });
+
+    card.innerHTML = `
+      <div class="ahead">
+        <div class="name">${a.name}</div>
+        <div class="slinfo">SL ${fmt(a.sl)} điểm · ${fmt(a.pointValue)}$/điểm/lot</div>
+      </div>
+      ${rows}
+    `;
+    resultsDiv.appendChild(card);
+  });
+}
+
+renderAdvanced();
+calculate();
+</script>
+</body>
+</html>
