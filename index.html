@@ -28,8 +28,13 @@
     padding:22px 14px 90px;
     line-height:1.6;
     letter-spacing:.02em;
-    max-width:460px;
+    max-width:520px;
     margin:0 auto;
+  }
+  @media (min-width:820px){
+    body{max-width:840px;padding:36px 24px 100px;}
+    .results{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+    .assetcard{margin-top:0;}
   }
   h1,.disp{font-family:'Space Grotesk', sans-serif;}
 
@@ -108,6 +113,27 @@
   .lvrow .risk .r2{font-size:10px;color:var(--muted);margin-top:2px;}
   .lvrow .risk .r2.warn{color:var(--gold);}
 
+  .progresscard{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;margin-top:14px;
+  }
+  .progresscard h2{
+    font-size:13px;font-weight:600;color:#3E8EF7;margin:0 0 12px;
+    font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;
+  }
+  .prow{
+    display:grid;grid-template-columns:1fr auto;align-items:center;
+    gap:12px;padding:12px 0;border-top:1px solid var(--border);
+  }
+  .prow:first-of-type{border-top:none;}
+  .prow .plabel{font-size:12.5px;color:var(--text);font-family:'Space Grotesk',sans-serif;}
+  .prow .prisk{font-size:10.5px;color:var(--muted);display:block;margin-top:2px;}
+  .prow .pcount{
+    font-size:19px;font-weight:700;color:var(--green);text-align:right;
+    font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif;white-space:nowrap;
+  }
+  .progresscard .note{font-size:10.5px;color:var(--muted);margin-top:10px;line-height:1.6;}
+
   footer{text-align:center;color:var(--muted);font-size:11px;margin-top:24px;line-height:1.7;padding:0 6px;}
 </style>
 </head>
@@ -120,17 +146,17 @@
   <div class="ticker">
     <div class="block">
       <div class="label">Vốn hiện tại</div>
-      <div class="val" id="tCapital">500</div>
+      <div class="val" id="tCapital">1000</div>
     </div>
     <div class="divider"></div>
     <div class="block">
       <div class="label">Mục tiêu</div>
-      <div class="val" id="tTarget">8000</div>
+      <div class="val" id="tTarget">8700</div>
     </div>
     <div class="divider"></div>
     <div class="block">
       <div class="label">Còn thiếu</div>
-      <div class="val gold" id="tRemain">7500</div>
+      <div class="val gold" id="tRemain">7700</div>
     </div>
   </div>
 </header>
@@ -139,11 +165,11 @@
   <div class="row">
     <div class="field">
       <label>Vốn tài khoản FX (USD)</label>
-      <input type="number" id="capital" value="500" inputmode="decimal" oninput="calculate()">
+      <input type="number" id="capital" value="1000" inputmode="decimal" oninput="calculate()">
     </div>
     <div class="field">
       <label>Mục tiêu (USD)</label>
-      <input type="number" id="target" value="8000" inputmode="decimal" oninput="calculate()">
+      <input type="number" id="target" value="8700" inputmode="decimal" oninput="calculate()">
     </div>
   </div>
 </div>
@@ -153,7 +179,9 @@
   <div class="adv-body" id="advBody"></div>
 </details>
 
-<div id="results"></div>
+<div id="progressCard" class="progresscard"></div>
+
+<div id="results" class="results"></div>
 
 <footer>Volume (Lot) = Risk USD ÷ (SL cố định × giá trị/điểm/lot) — làm tròn bậc 0.01, giới hạn trong [Lot min, Lot max]. Vì lot bị làm tròn/giới hạn, Risk thực tế có thể lệch khỏi Risk mục tiêu — xem cột bên phải.</footer>
 
@@ -209,6 +237,40 @@ function renderAdvanced(){
   box.innerHTML = html;
 }
 
+function renderProgress(capital, target){
+  const box = document.getElementById('progressCard');
+  const labels = {
+    5: 'Full lệnh (5%)',
+    2.5: '2 lệnh (2.50% mỗi lệnh)',
+    1.25: '4 lệnh (1.25% mỗi lệnh)',
+    0.625: '8 lệnh (0.625% mỗi lệnh)',
+  };
+  let rows = '';
+  levels.forEach(pct=>{
+    const riskUSD = capital * pct/100;
+    let count = '—';
+    if(capital>0 && target>capital && pct>0){
+      const mult = 1 + pct/100;
+      count = Math.ceil(Math.log(target/capital)/Math.log(mult));
+    } else if(target<=capital){
+      count = 0;
+    }
+    rows += `
+      <div class="prow">
+        <div>
+          <div class="plabel">${labels[pct] || pct+'%'}</div>
+          <span class="prisk">Risk mỗi lệnh: ${fmt(riskUSD)}$</span>
+        </div>
+        <div class="pcount">${count} lệnh</div>
+      </div>`;
+  });
+  box.innerHTML = `
+    <h2>Hành trình mục tiêu — số lệnh còn lại</h2>
+    ${rows}
+    <div class="note">* Số lệnh thắng liên tiếp cần thiết (RR 1:1, không tính lệnh thua) để đi từ vốn hiện tại đến mục tiêu — đây là mốc lý tưởng để theo dõi, không phải dự đoán chắc chắn.</div>
+  `;
+}
+
 function calculate(){
   const capital = parseFloat(document.getElementById('capital').value)||0;
   const target = parseFloat(document.getElementById('target').value)||0;
@@ -216,6 +278,8 @@ function calculate(){
   document.getElementById('tCapital').textContent = fmt(capital);
   document.getElementById('tTarget').textContent = fmt(target);
   document.getElementById('tRemain').textContent = fmt(target-capital);
+
+  renderProgress(capital, target);
 
   const resultsDiv = document.getElementById('results');
   resultsDiv.innerHTML = '';
