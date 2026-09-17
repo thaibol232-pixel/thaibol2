@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>FX Volume Calculator</title>
+<title>Kế hoạch Vàng — FX</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -16,7 +16,7 @@
     --muted:#7C8797;
     --gold:#F5A623;
     --green:#3ECF8E;
-    --red:#E0645C;
+    --blue:#3E8EF7;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -32,15 +32,12 @@
     margin:0 auto;
   }
   @media (min-width:820px){
-    body{max-width:840px;padding:36px 24px 100px;}
-    .results{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
-    .assetcard{margin-top:0;}
+    body{max-width:760px;padding:36px 24px 100px;}
+    .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .twocol > .card{margin-top:0;}
   }
-  h1,.disp{font-family:'Space Grotesk', sans-serif;}
-
-  header{margin-bottom:20px;}
-  header h1{font-size:19px;font-weight:700;margin:0 0 4px;}
-  header .sub{font-size:12px;color:var(--muted);}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;margin:0 0 4px;}
+  .sub{font-size:12px;color:var(--muted);}
 
   .ticker{
     margin-top:16px;
@@ -56,10 +53,13 @@
   .ticker .val.gold{color:var(--gold);}
   .ticker .divider{width:1px;background:var(--border);align-self:stretch;}
 
-  .inputs{
+  .card{
     background:var(--card);border:1px solid var(--border);border-radius:14px;
-    padding:16px;margin-top:14px;
+    padding:16px 18px;margin-top:14px;
   }
+  .card h2{font-size:13px;font-weight:600;margin:0 0 12px;font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;color:var(--gold);}
+  .card h2.blue{color:var(--blue);}
+
   .row{display:flex;gap:12px;}
   .row + .row{margin-top:12px;}
   .field{flex:1;min-width:0;}
@@ -71,10 +71,7 @@
   }
   input:focus{border-color:var(--gold);}
 
-  details{
-    margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;
-    overflow:hidden;
-  }
+  details{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
   summary{
     padding:14px 16px;cursor:pointer;font-family:'Space Grotesk',sans-serif;
     font-size:12.5px;color:var(--muted);letter-spacing:.03em;
@@ -83,246 +80,223 @@
   summary::-webkit-details-marker{display:none;}
   summary:after{content:'⚙ Tùy chỉnh';}
   details .adv-body{padding:0 16px 16px;border-top:1px solid var(--border);padding-top:14px;}
-  .asset-adv{margin-bottom:14px;}
-  .asset-adv:last-child{margin-bottom:0;}
-  .asset-adv .aname{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:8px;font-family:'Space Grotesk',sans-serif;}
 
-  .assetcard{
-    background:var(--card);border:1px solid var(--border);border-radius:14px;
-    padding:18px;margin-top:14px;
+  .bignum{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--green);
+    font-size:34px;line-height:1.1;font-variant-numeric:tabular-nums;
   }
-  .assetcard .ahead{
-    display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;
-  }
-  .assetcard .ahead .name{font-size:17px;font-weight:700;color:var(--gold);font-family:'Space Grotesk',sans-serif;}
-  .assetcard .ahead .slinfo{font-size:11px;color:var(--muted);}
+  .bigsub{font-size:11.5px;color:var(--muted);margin-top:4px;}
 
-  .lvrow{
-    display:grid;grid-template-columns:1fr auto auto;align-items:center;
-    gap:16px;padding:13px 0;border-top:1px solid var(--border);
-  }
-  .lvrow:first-of-type{border-top:none;}
-  .lvrow .pct{font-size:12.5px;color:var(--text);font-family:'Space Grotesk',sans-serif;}
-  .lvrow .pct .p{color:var(--muted);font-size:10.5px;display:block;margin-top:2px;}
-  .lvrow .lot{
-    font-size:20px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;
-    text-align:right;font-family:'Space Grotesk',sans-serif;min-width:56px;
-  }
-  .lvrow .risk{text-align:right;}
-  .lvrow .risk .r1{font-size:12px;color:var(--text);font-variant-numeric:tabular-nums;}
-  .lvrow .risk .r2{font-size:10px;color:var(--muted);margin-top:2px;}
-  .lvrow .risk .r2.warn{color:var(--gold);}
+  .statline{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--border);font-size:12.5px;}
+  .statline:first-of-type{border-top:none;}
+  .statline .k{color:var(--muted);}
+  .statline .v{font-variant-numeric:tabular-nums;font-weight:600;}
 
-  .progresscard{
-    background:var(--card);border:1px solid var(--border);border-radius:14px;
-    padding:16px 18px;margin-top:14px;
-  }
-  .progresscard h2{
-    font-size:13px;font-weight:600;color:#3E8EF7;margin:0 0 12px;
-    font-family:'Space Grotesk',sans-serif;letter-spacing:.03em;
-  }
   .prow{
     display:grid;grid-template-columns:1fr auto;align-items:center;
-    gap:12px;padding:12px 0;border-top:1px solid var(--border);
+    gap:12px;padding:14px 0;border-top:1px solid var(--border);
   }
   .prow:first-of-type{border-top:none;}
-  .prow .plabel{font-size:12.5px;color:var(--text);font-family:'Space Grotesk',sans-serif;}
-  .prow .prisk{font-size:10.5px;color:var(--muted);display:block;margin-top:2px;}
-  .prow .pcount{
-    font-size:19px;font-weight:700;color:var(--green);text-align:right;
-    font-variant-numeric:tabular-nums;font-family:'Space Grotesk',sans-serif;white-space:nowrap;
+  .prow .plabel{font-size:13px;font-weight:600;font-family:'Space Grotesk',sans-serif;}
+  .prow .psub{font-size:10.5px;color:var(--muted);margin-top:3px;}
+  .prow .pval{
+    text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:20px;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap;
   }
-  .progresscard .note{font-size:10.5px;color:var(--muted);margin-top:10px;line-height:1.6;}
+  .prow .pval .u{display:block;font-size:10px;color:var(--muted);font-weight:500;margin-top:2px;}
 
-  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:24px;line-height:1.7;padding:0 6px;}
+  .note{font-size:10.5px;color:var(--muted);margin-top:10px;line-height:1.6;}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>FX Volume Calculator</h1>
-  <div class="sub">BTC · ETH · XAU — SL cố định, tính Lot theo % tài khoản</div>
+  <h1>Kế hoạch Vàng (XAU) — FX</h1>
+  <div class="sub">1 lệnh/lần · Risk % vốn cố định · SL/TP cố định theo điểm</div>
 
   <div class="ticker">
     <div class="block">
       <div class="label">Vốn hiện tại</div>
-      <div class="val" id="tCapital">1000</div>
+      <div class="val" id="tCapital">600</div>
     </div>
     <div class="divider"></div>
     <div class="block">
       <div class="label">Mục tiêu</div>
-      <div class="val" id="tTarget">8700</div>
+      <div class="val" id="tTarget">8800</div>
     </div>
     <div class="divider"></div>
     <div class="block">
       <div class="label">Còn thiếu</div>
-      <div class="val gold" id="tRemain">7700</div>
+      <div class="val gold" id="tRemain">8200</div>
     </div>
   </div>
 </header>
 
-<div class="inputs">
+<div class="card">
+  <h2>Vốn & mục tiêu</h2>
   <div class="row">
     <div class="field">
-      <label>Vốn tài khoản FX (USD)</label>
-      <input type="number" id="capital" value="1000" inputmode="decimal" oninput="calculate()">
+      <label>Vốn hiện tại (USD)</label>
+      <input type="number" id="capital" value="600" inputmode="decimal" oninput="calculate()">
     </div>
     <div class="field">
       <label>Mục tiêu (USD)</label>
-      <input type="number" id="target" value="8700" inputmode="decimal" oninput="calculate()">
+      <input type="number" id="target" value="8800" inputmode="decimal" oninput="calculate()">
     </div>
   </div>
 </div>
 
 <details id="advDetails">
-  <summary>Cài đặt SL cố định & giới hạn Lot</summary>
-  <div class="adv-body" id="advBody"></div>
+  <summary>Cài đặt SL / TP / Risk / Giới hạn Lot</summary>
+  <div class="adv-body">
+    <div class="row">
+      <div class="field">
+        <label>Risk mỗi lệnh (%)</label>
+        <input type="number" id="riskPct" value="1" step="0.01" inputmode="decimal" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>SL cố định (điểm giá)</label>
+        <input type="number" id="slPts" value="10" inputmode="decimal" oninput="calculate()">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>TP cố định (điểm giá)</label>
+        <input type="number" id="tpPts" value="12" inputmode="decimal" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>Giá trị/điểm/1.00 lot (USD)</label>
+        <input type="number" id="pointValue" value="100" inputmode="decimal" oninput="calculate()">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Lot tối thiểu</label>
+        <input type="number" id="lotMin" value="0.01" step="0.01" inputmode="decimal" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>Lot tối đa</label>
+        <input type="number" id="lotMax" value="2" step="0.01" inputmode="decimal" oninput="calculate()">
+      </div>
+    </div>
+  </div>
 </details>
 
-<div id="progressCard" class="progresscard"></div>
+<div class="card">
+  <h2>Lệnh hiện tại</h2>
+  <div class="bignum" id="lotOut">0.01</div>
+  <div class="bigsub" id="lotNote">lot cho vốn hiện tại</div>
+  <div style="margin-top:14px;">
+    <div class="statline"><div class="k">Risk mỗi lệnh (USD)</div><div class="v" id="riskUSD">6</div></div>
+    <div class="statline"><div class="k">Lợi nhuận mục tiêu / lệnh thắng (USD)</div><div class="v" id="tpUSD">7.2</div></div>
+    <div class="statline"><div class="k">Tỉ lệ R:R</div><div class="v" id="rrRatio">1 : 1.2</div></div>
+  </div>
+</div>
 
-<div id="results" class="results"></div>
+<div class="card">
+  <h2 class="blue">Số lệnh thắng cần để đạt mục tiêu</h2>
+  <div class="bignum" id="tradesNeeded">0</div>
+  <div class="bigsub">lệnh thắng liên tiếp (giả định không có lệnh thua)</div>
+</div>
 
-<footer>Volume (Lot) = Risk USD ÷ (SL cố định × giá trị/điểm/lot) — làm tròn bậc 0.01, giới hạn trong [Lot min, Lot max]. Vì lot bị làm tròn/giới hạn, Risk thực tế có thể lệch khỏi Risk mục tiêu — xem cột bên phải.</footer>
+<div class="twocol">
+  <div class="card">
+    <h2 class="blue">Kịch bản 1 lệnh / ngày</h2>
+    <div class="prow">
+      <div>
+        <div class="plabel">Số ngày cần</div>
+        <div class="psub">5 ngày làm việc / tuần</div>
+      </div>
+      <div class="pval" id="days1"> </div>
+    </div>
+    <div class="prow">
+      <div class="plabel">Quy đổi tuần</div>
+      <div class="pval" id="weeks1"> </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="blue">Kịch bản 2 lệnh / ngày</h2>
+    <div class="prow">
+      <div>
+        <div class="plabel">Số ngày cần</div>
+        <div class="psub">5 ngày làm việc / tuần</div>
+      </div>
+      <div class="pval" id="days2"> </div>
+    </div>
+    <div class="prow">
+      <div class="plabel">Quy đổi tuần</div>
+      <div class="pval" id="weeks2"> </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="note">* Số lệnh, số ngày và số tuần là mốc lý tưởng giả định TẤT CẢ lệnh đều thắng đúng TP — dùng để theo dõi tiến độ, không phải cam kết hay dự đoán chắc chắn. Thực tế sẽ có lệnh thua nên thời gian thực tế sẽ dài hơn. Lot được làm tròn bậc 0.01 và giới hạn trong khoảng Lot tối thiểu/tối đa đã đặt.</div>
+</div>
 
 <script>
-let assets = [
-  {name:"BTC", sl:1000, pointValue:1},
-  {name:"ETH", sl:1000, pointValue:1},
-  {name:"XAU", sl:10,   pointValue:100},
-];
-let lotMin = 0.01;
-let lotMax = 2;
-const lotStep = 0.01;
-const levels = [5, 2.5, 1.25, 0.625]; // % risk mỗi lệnh
-
 function fmt(n){
   if(!isFinite(n)) return '-';
   return n.toLocaleString('en-US', {maximumFractionDigits:4});
 }
 
-function renderAdvanced(){
-  const box = document.getElementById('advBody');
-  let html = '';
-  assets.forEach((a,i)=>{
-    html += `
-      <div class="asset-adv">
-        <div class="aname">${a.name}</div>
-        <div class="row">
-          <div class="field">
-            <label>SL cố định (điểm)</label>
-            <input type="number" value="${a.sl}" inputmode="decimal" oninput="assets[${i}].sl=parseFloat(this.value)||0;calculate()">
-          </div>
-          <div class="field">
-            <label>Giá trị/điểm/1.00 lot (USD)</label>
-            <input type="number" value="${a.pointValue}" inputmode="decimal" oninput="assets[${i}].pointValue=parseFloat(this.value)||0;calculate()">
-          </div>
-        </div>
-      </div>`;
-  });
-  html += `
-    <div class="asset-adv" style="border-top:1px solid var(--border);padding-top:14px;">
-      <div class="aname" style="color:var(--muted);">Giới hạn Lot</div>
-      <div class="row">
-        <div class="field">
-          <label>Lot tối thiểu</label>
-          <input type="number" value="${lotMin}" step="0.01" inputmode="decimal" oninput="lotMin=parseFloat(this.value)||0.01;calculate()">
-        </div>
-        <div class="field">
-          <label>Lot tối đa</label>
-          <input type="number" value="${lotMax}" step="0.01" inputmode="decimal" oninput="lotMax=parseFloat(this.value)||2;calculate()">
-        </div>
-      </div>
-    </div>`;
-  box.innerHTML = html;
-}
-
-function renderProgress(capital, target){
-  const box = document.getElementById('progressCard');
-  const labels = {
-    5: 'Full lệnh (5%)',
-    2.5: '2 lệnh (2.50% mỗi lệnh)',
-    1.25: '4 lệnh (1.25% mỗi lệnh)',
-    0.625: '8 lệnh (0.625% mỗi lệnh)',
-  };
-  let rows = '';
-  levels.forEach(pct=>{
-    const riskUSD = capital * pct/100;
-    let count = '—';
-    if(capital>0 && target>capital && pct>0){
-      const mult = 1 + pct/100;
-      count = Math.ceil(Math.log(target/capital)/Math.log(mult));
-    } else if(target<=capital){
-      count = 0;
-    }
-    rows += `
-      <div class="prow">
-        <div>
-          <div class="plabel">${labels[pct] || pct+'%'}</div>
-          <span class="prisk">Risk mỗi lệnh: ${fmt(riskUSD)}$</span>
-        </div>
-        <div class="pcount">${count} lệnh</div>
-      </div>`;
-  });
-  box.innerHTML = `
-    <h2>Hành trình mục tiêu — số lệnh còn lại</h2>
-    ${rows}
-    <div class="note">* Số lệnh thắng liên tiếp cần thiết (RR 1:1, không tính lệnh thua) để đi từ vốn hiện tại đến mục tiêu — đây là mốc lý tưởng để theo dõi, không phải dự đoán chắc chắn.</div>
-  `;
-}
-
 function calculate(){
   const capital = parseFloat(document.getElementById('capital').value)||0;
   const target = parseFloat(document.getElementById('target').value)||0;
+  const riskPct = parseFloat(document.getElementById('riskPct').value)||0;
+  const slPts = parseFloat(document.getElementById('slPts').value)||0;
+  const tpPts = parseFloat(document.getElementById('tpPts').value)||0;
+  const pointValue = parseFloat(document.getElementById('pointValue').value)||0;
+  const lotMin = parseFloat(document.getElementById('lotMin').value)||0.01;
+  const lotMax = parseFloat(document.getElementById('lotMax').value)||2;
 
   document.getElementById('tCapital').textContent = fmt(capital);
   document.getElementById('tTarget').textContent = fmt(target);
   document.getElementById('tRemain').textContent = fmt(target-capital);
 
-  renderProgress(capital, target);
+  // ---- Lệnh hiện tại: lot tự động theo % risk, làm tròn 0.01, giới hạn min/max ----
+  const riskUSD = capital * riskPct/100;
+  const denom = slPts * pointValue;
+  let rawLot = denom ? riskUSD/denom : 0;
+  let lot = Math.round(rawLot/0.01)*0.01;
+  let note = 'lot cho vốn hiện tại';
+  if(riskUSD > 0 && lot < lotMin){ lot = lotMin; note = 'chạm sàn lot tối thiểu'; }
+  if(lot > lotMax){ lot = lotMax; note = 'chạm trần lot tối đa'; }
+  lot = Math.round(lot*100)/100;
 
-  const resultsDiv = document.getElementById('results');
-  resultsDiv.innerHTML = '';
+  const actualRiskUSD = lot * denom;
+  const actualTpUSD = lot * tpPts * pointValue;
+  const rr = slPts ? (tpPts/slPts) : 0;
 
-  assets.forEach(a=>{
-    const card = document.createElement('div');
-    card.className = 'assetcard';
+  document.getElementById('lotOut').textContent = lot.toFixed(2);
+  document.getElementById('lotNote').textContent = note;
+  document.getElementById('riskUSD').textContent = fmt(actualRiskUSD) + '$';
+  document.getElementById('tpUSD').textContent = fmt(actualTpUSD) + '$';
+  document.getElementById('rrRatio').textContent = `1 : ${rr.toFixed(2)}`;
 
-    let rows = '';
-    levels.forEach(pct=>{
-      const riskUSD = capital * pct/100;
-      const denom = a.sl * a.pointValue;
-      let rawLot = denom ? riskUSD/denom : 0;
-      let lot = Math.round(rawLot/lotStep)*lotStep;
-      let clampNote = '';
-      if(riskUSD > 0 && lot < lotMin){ lot = lotMin; clampNote = 'chạm sàn lot'; }
-      if(lot > lotMax){ lot = lotMax; clampNote = 'chạm trần lot'; }
-      lot = Math.round(lot*100)/100;
-      const actualRisk = lot * denom;
+  // ---- Số lệnh thắng cần thiết (compounding theo % risk mỗi lệnh, nhân RR) ----
+  let trades = 0;
+  if(capital > 0 && target > capital && riskPct > 0 && rr > 0){
+    const mult = 1 + (riskPct/100) * rr;
+    trades = Math.ceil(Math.log(target/capital) / Math.log(mult));
+  } else if(target <= capital){
+    trades = 0;
+  }
+  document.getElementById('tradesNeeded').textContent = trades;
 
-      rows += `
-        <div class="lvrow">
-          <div class="pct">${pct}%<span class="p">Risk ${fmt(riskUSD)}$</span></div>
-          <div class="risk">
-            <div class="r1">${fmt(actualRisk)}$</div>
-            <div class="r2 ${clampNote?'warn':''}">${clampNote || 'risk thực tế'}</div>
-          </div>
-          <div class="lot">${lot.toFixed(2)}</div>
-        </div>`;
-    });
+  // ---- Quy đổi ngày / tuần cho 2 kịch bản ----
+  const days1 = trades; // 1 lệnh/ngày
+  const weeks1 = Math.ceil(days1/5);
+  const days2 = Math.ceil(trades/2); // 2 lệnh/ngày
+  const weeks2 = Math.ceil(days2/5);
 
-    card.innerHTML = `
-      <div class="ahead">
-        <div class="name">${a.name}</div>
-        <div class="slinfo">SL ${fmt(a.sl)} điểm · ${fmt(a.pointValue)}$/điểm/lot</div>
-      </div>
-      ${rows}
-    `;
-    resultsDiv.appendChild(card);
-  });
+  document.getElementById('days1').innerHTML = `${days1}<span class="u">ngày</span>`;
+  document.getElementById('weeks1').innerHTML = `${weeks1}<span class="u">tuần</span>`;
+  document.getElementById('days2').innerHTML = `${days2}<span class="u">ngày</span>`;
+  document.getElementById('weeks2').innerHTML = `${weeks2}<span class="u">tuần</span>`;
 }
 
-renderAdvanced();
 calculate();
 </script>
 </body>
